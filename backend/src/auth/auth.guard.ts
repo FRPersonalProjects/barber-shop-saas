@@ -1,4 +1,4 @@
-import {
+/* import {
   CanActivate,
   ExecutionContext,
   Inject,
@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 interface AuthenticatedRequest extends Request {
-  user?: unknown;
+  user?: string | object;
   userId?: string | number;
 }
 
@@ -50,3 +50,4 @@ export class AuthGuard implements CanActivate {
 }
 
 // autorization Bearer <token>
+ */

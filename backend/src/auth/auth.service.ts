@@ -4,46 +4,45 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Prisma } from 'generated/prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
+// import { UserService } from 'src/user/user.service';
 import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class AuthService {
   @Inject()
-  private readonly userService: UserService;
-
-  @Inject()
-  private readonly jwtService: JwtService; // injetando o servico de jwt
+  private readonly jwtService: JwtService;
 
   @Inject()
   private readonly prisma: PrismaService;
 
   // servico responsavel pela autenticacao dos usuarios
 
-  // metodo para login
-  async signIn(
-    params: Prisma.UserCreateInput, // parametros: email e password
-  ): Promise<{ access_token: string }> {
-    // retorna o token de acesso
+  // metodo para validar o usuario
+  async validateUser(email: string, password: string) {
     const user = await this.prisma.user.findFirst({
-      where: { email: params.email },
-    }); // buscando usuario pelo email
-    if (!user)
-      // se usuario nao encontrado
-      throw new NotFoundException('User not found');
-
+      where: { email },
+    });
+    if (!user) return null;
     const passwordMatch: boolean = await bcrypt.compare(
-      params.password,
+      password,
       user.password,
-    ); // comparando senha de login com cadastrada
-    if (!passwordMatch)
-      // se senha nao bate
-      throw new UnauthorizedException('Invalid credentials');
+    );
+    if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
+    const { password: _, ...safeUser } = user; // omitindo a senha do usuario
+    return safeUser;
+  }
 
-    const payload = { user: user.id }; // criando payload para o jwt
+  // metodo para emitir o token jwt
+  async login(params: {
+    email: string;
+    password: string;
+  }): Promise<{ access_token: string }> {
+    const user = await this.validateUser(params.email, params.password); // buscando usuario pelo email
+    if (!user) throw new UnauthorizedException('Invalid credentials');
+
+    const payload = { sub: user.id, email: user.email }; // criando payload para o jwt
 
     return { access_token: await this.jwtService.signAsync(payload) };
   }

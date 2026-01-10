@@ -4,14 +4,18 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from 'src/user/user.module';
-import { AuthGuard } from './auth.guard';
+// import { AuthGuard } from './auth.guard';
 import { DatabaseModule } from 'src/database/database.module';
+import { AuthStrategy } from './auth.strategy';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
 
 // console.log(process.env.SECRET_KEY);
 
 @Module({
   imports: [
     DatabaseModule,
+    PassportModule,
     forwardRef(() => UserModule),
     JwtModule.register({
       // importar modulos para o servico de autenticacao
@@ -21,7 +25,7 @@ import { DatabaseModule } from 'src/database/database.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard], // registrar tambem guardiao como provedor
-  exports: [AuthGuard, AuthService], // exportar para uso em outros modulos
+  providers: [AuthService, AuthStrategy, JwtStrategy],
+  exports: [AuthService], // exportar para uso em outros modulos
 })
 export class AuthModule {}
