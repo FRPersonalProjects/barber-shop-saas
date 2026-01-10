@@ -12,11 +12,8 @@ import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class AuthService {
-  /* @Inject()
-    private readonly userService: UserService; */
-
   @Inject()
-  private readonly userService: UserService; // injetando o servico de usuario
+  private readonly userService: UserService;
 
   @Inject()
   private readonly jwtService: JwtService; // injetando o servico de jwt
