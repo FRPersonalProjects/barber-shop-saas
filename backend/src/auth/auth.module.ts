@@ -1,10 +1,8 @@
 import 'dotenv/config'; // carregar variaveis de ambiente do .env antes de tudo
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { UserModule } from 'src/user/user.module';
-// import { AuthGuard } from './auth.guard';
 import { DatabaseModule } from 'src/database/database.module';
 import { AuthStrategy } from './auth.strategy';
 import { PassportModule } from '@nestjs/passport';
@@ -16,7 +14,6 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     DatabaseModule,
     PassportModule,
-    forwardRef(() => UserModule),
     JwtModule.register({
       // importar modulos para o servico de autenticacao
       global: true, // tornar o modulo global
