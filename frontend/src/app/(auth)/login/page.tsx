@@ -2,10 +2,10 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "../_lib/auth";
-import { Button } from "../_components/ui/button";
-import { Input } from "../_components/ui/input";
-import { Card, CardContent } from "../_components/ui/card";
+import { auth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -19,10 +19,10 @@ function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      // auth.login agora só faz o POST. 
+      // auth.login agora só faz o POST.
       // browser recebe o cookie 'set-cookie' automaticamente.
       await auth.login(email, password);
-      
+
       // Se !erro, o cookie esta salvo, redirecionar
       router.push("/");
       router.refresh(); // garante que a home recarregue com o novo cookie
