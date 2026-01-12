@@ -26,6 +26,20 @@ export class UserService {
     });
   }
 
+  // metodo para buscar todos os usuarios
+  async findAll(): Promise<Omit<User, 'password'>[]> {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: false,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
   // metodo para criar usuario
   async create(data: Prisma.UserCreateInput): Promise<User> {
     // retorna o usuario criado

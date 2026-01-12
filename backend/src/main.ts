@@ -14,7 +14,6 @@ async function bootstrap() {
     .setTitle('TrimTech')
     .setDescription('Saas API')
     .setVersion('1.0')
-    .addTag('user')
     .build();
 
   const documentFactory = (): OpenAPIObject =>
