@@ -25,7 +25,7 @@ export class AuthService {
       where: { email },
     });
 
-    if (!user) throw new NotFoundException('Email nao encontrado');
+    if (!user) throw new UnauthorizedException('Email nao encontrado');
 
     const passwordMatch: boolean = await bcrypt.compare(
       password,
