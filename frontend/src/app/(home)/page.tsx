@@ -6,44 +6,28 @@ import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { request } from "@/lib/request";
-import { sortBarbershopsByName } from "@/lib/utils";
-import { getBarbershops } from "@/lib/barbershop";
+import {
+  getBarbershops,
+  getBarbershopsSortedByName,
+} from "@/services/barbershop";
+import { getUserMe } from "@/services/user";
+import { LogoutButton } from "@/components/logout-button";
+import { QUICK_SEARCH_OPTIONS } from "@/constants/quickSearchOptions";
+import BookingItem from "@/components/booking-item";
 
 async function Home() {
-  // pega todos os cookies para repassar ao backend
   const cookieStore = cookies();
   const cookieHeader = cookieStore
     .getAll()
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
-  const user = await request("/users/me", {
-    headers: { cookie: cookieHeader },
-    cache: "no-store",
-  });
-
-  let barbershops = [];
-  let popularBarbershops = [];
-  try {
-  // 1. Primeiro guardamos o resultado da API em uma variável (ex: data)
-  const data = await request("/barbershops", {
-    headers: { cookie: cookieHeader },
-    cache: "no-store",
-  });
-
-  // 2. Agora passamos esse 'data' para a função de ordenação
-  // Se você estiver usando a função getBarbershopsSortedByName que criamos, 
-  // ela já faz tudo isso. Mas se estiver ordenando manualmente na página:
-  barbershops = await getBarbershops(cookieHeader);
-  popularBarbershops = sortBarbershopsByName(barbershops); 
-
-} catch (err) {
-  console.error("Erro ao buscar barbearias:", err);
-  barbershops = [];
-}
+  // dispara todas ao mesmo tempo, tempo de espera será apenas o da chamada mais lenta
+  const [user, barbershops, popularBarbershops] = await Promise.all([
+    getUserMe(cookieHeader),
+    getBarbershops(cookieHeader),
+    getBarbershopsSortedByName(cookieHeader),
+  ]);
 
   return (
     <div>
@@ -51,12 +35,27 @@ async function Home() {
       <div className="pt-2 p-5">
         <h2 className="text-xl font-bold">Olá, {user.name}!</h2>
         <p>Sexta feira, 09 de janeiro</p>
-        <div className="flex items-center gap-2 mt-6 space-x-2">
+        <div className="flex items-center gap-2 mt-6">
           <Input placeholder="Faça sua busca..." />
           <Button>
             <SearchIcon />
           </Button>
         </div>
+
+        <div className="flex overflow-x-scroll gap-3 mt-6 [&::-webkit-scrollbar]:hidden">
+          {QUICK_SEARCH_OPTIONS.map((option) => (
+            <Button key={option.title} variant="secondary" className="gap-2">
+              <Image
+                src={option.image}
+                width={16}
+                height={16}
+                alt={option.title}
+              />
+              {option.title}
+            </Button>
+          ))}
+        </div>
+
         <div className="relative w-full h-[150px] mt-6">
           <Image
             alt="Banner"
@@ -66,30 +65,7 @@ async function Home() {
           />
         </div>
 
-        <h2 className="mb-3 uppercase text-xs font-bold text-gray-400 mt-6 ">
-          Agendamentos
-        </h2>
-        <Card className="rounded-2xl">
-          <CardContent className="flex justify-between p-0">
-            {/* esquerda */}
-            <div className="flex flex-col gap-2 py-5 pl-5">
-              <Badge className="w-fit">Confirmado</Badge>
-              <h3 className="font-semibold">Corte de Cabelo</h3>
-              <div className="flex items-center gap-2">
-                <Avatar className="w-6 h-6">
-                  <AvatarImage src="https://utfs.io/f/c97a2dc9-cf62-468b-a851-bfd2bdde775f-16p.png" />
-                </Avatar>
-                <p className="text-sm">Nome da Barbearia</p>
-              </div>
-            </div>
-            {/* direita */}
-            <div className="flex flex-col items-center justify-center px-5 border-l-2 border-solid">
-              <p className="text-sm">Agosto</p>
-              <p className="text-2xl">05</p>
-              <p className="text-sm">08:00</p>
-            </div>
-          </CardContent>
-        </Card>
+        <BookingItem />
 
         <h2 className="mb-3 uppercase text-xs font-bold text-gray-400 mt-6 ">
           Populares
@@ -105,11 +81,13 @@ async function Home() {
             </div>
           )}
         </div>
+
         <h2 className="mb-3 uppercase text-xs font-bold text-gray-400 mt-6 ">
           Recomendados
         </h2>
         <div className="flex gap-4 overflow-auto [&::-webkit-scrollbar]:hidden">
-          {Array.isArray(popularBarbershops) && popularBarbershops.length > 0 ? (
+          {Array.isArray(popularBarbershops) &&
+          popularBarbershops.length > 0 ? (
             popularBarbershops.map((b: any) => (
               <BarbershopItem key={b.id} barbershop={b} />
             ))
@@ -119,6 +97,18 @@ async function Home() {
             </div>
           )}
         </div>
+
+        <LogoutButton />
+
+        <footer>
+          <Card>
+            <CardContent className="px-5 py-6">
+              <p className="text-sm text-gray-400">
+                @2026 Copyright <span className="font-bold">TrimTech</span>
+              </p>
+            </CardContent>
+          </Card>
+        </footer>
       </div>
     </div>
   );
