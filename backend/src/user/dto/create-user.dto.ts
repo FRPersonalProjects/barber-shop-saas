@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsString,
   Length,
+  IsAlphanumeric,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -16,7 +17,7 @@ export class CreateUserDto {
   email: string; // validar email como email
 
   @Length(8)
-  @IsAlpha()
+  @IsAlphanumeric()
   password: string; // validar senha com no minimo 8 caracteres alfanumericos
 }
 
